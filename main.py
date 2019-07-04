@@ -14,7 +14,7 @@ headers = {
 index_dataset_folder = 'indexList'
 if index_dataset_folder not in os.listdir('./'):
     os.mkdir('./' + index_dataset_folder)
-    index_dataset_folder += '/'
+index_dataset_folder += '/'
 
 
 def get_random_serial():
