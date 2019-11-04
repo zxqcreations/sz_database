@@ -17,40 +17,7 @@ stock_dataset_folder = 'stockdata'
 if stock_dataset_folder not in os.listdir('./'):
     os.mkdir('./' + stock_dataset_folder)
 stock_dataset_folder += '/'
-
-
-def download_full_stock_data():
-    # index_data_set = './indexList/sz_all_list.csv'
-    index_data_set = './indexList/sz_SSE_Composite_Index_list.csv'
-    with open(index_data_set, 'r', encoding="utf-8-sig") as f:
-        header = f.readline()
-        while True:
-            ori_data = f.readline()
-            if not ori_data:
-                break
-            datas = ori_data.split(',')
-            # stock_id = datas[7]
-            # stock_name = datas[10]
-            stock_id = datas[3]
-            stock_name = datas[2].replace('*', 's')
-            print('Fetching', stock_name, stock_id)
-            res = get_single_stock_data(stock_id, '-300', '-1')
-            if not res:
-                time.sleep(1)
-                continue
-            stock_price = json.loads(res)
-            result = stock_price['kline']
-            stock_file = stock_dataset_folder + str(stock_id) + '_' + stock_name + '.csv'
-            dataset = ['id,date,open,high,low,close,volume']
-            for _id, item in enumerate(result):
-                item_data = [_id] + item
-                item_data = [str(i) for i in item_data]
-                item_data_str = ','.join(item_data)
-                dataset.append(item_data_str)
-            stock_price_history = '.\n'.join(dataset)
-            with open(stock_file, 'w', encoding="utf-8-sig") as s:
-                s.write(stock_price_history)
-            time.sleep(2)
+time_to_start = str((dt(1990, 12, 21) - dt.now()).days)
 
 
 def update_stock_data():
@@ -84,11 +51,11 @@ def update_stock_data():
                             is_updata = True
                             begin = (dt(int(last_time[:4]),
                                         int(last_time[4:6]),
-                                        int(last_time[6:8])) - dt.now()).days+1
+                                        int(last_time[6:8])) - dt.now()).days + 1
                         else:
-                            begin = '-300'
+                            begin = time_to_start
                     else:
-                        begin = '-300'
+                        begin = time_to_start
                     print('Fetching', stock_name, stock_id, begin)
                     if int(begin) >= -1:
                         print('Data for', stock_name, 'is up to date!')
@@ -103,7 +70,7 @@ def update_stock_data():
                     if len(result) > 0:
                         dataset = []
                         for _id, item in enumerate(result):
-                            item_data = [str(int(_id+1)+last_ind)] + item
+                            item_data = [str(int(_id + 1) + last_ind)] + item
                             item_data = [str(i) for i in item_data]
                             item_data_str = ','.join(item_data)
                             dataset.append(item_data_str)
@@ -111,10 +78,8 @@ def update_stock_data():
                             dataset = [','.join(dataset_head)] + dataset
                         final_result = '.\n'.join(dataset)
                         if is_updata:
-                            final_result = '\n'+final_result
+                            final_result = '\n' + final_result
                         s.write(final_result)
-                        # result_str = ','.join(result)
-                        # s.write(result_str)
                 time.sleep(2)
 
 
@@ -138,5 +103,4 @@ def get_single_stock_data(index, begin, end):
 
 
 if __name__ == '__main__':
-    # download_full_stock_data()
     update_stock_data()
